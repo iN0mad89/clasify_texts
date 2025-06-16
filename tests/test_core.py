@@ -4,9 +4,9 @@ import csv
 
 def test_batch_and_save_csv(tmp_path):
     from law_classifier.core import batch, save_csv
-    from law_classifier.rules import RuleEngine
+    from law_classifier.cli import get_engine
 
-    engine = RuleEngine(Path("data/terms.yaml"))
+    engine = get_engine()
     f1 = tmp_path / "a.txt"
     f1.write_text("Постанова про державний бюджет")
     f2 = tmp_path / "b.txt"
@@ -14,7 +14,7 @@ def test_batch_and_save_csv(tmp_path):
 
     results = batch(tmp_path, ["*.txt"], engine)
     assert len(results) == 2
-    cats = {getattr(r, "категорія", None) for r in results}
+    cats = {r.category for r in results}
     assert {"BUD", "UNLABELLED"} <= cats
 
     csv_path = tmp_path / "res.csv"

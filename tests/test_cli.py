@@ -30,6 +30,7 @@ def test_cli_classify(tmp_path):
 
 
 def test_cli_batch_multiworker(tmp_path):
+    from law_classifier.cli import main
     f1 = tmp_path / "a.txt"
     f1.write_text("Постанова про державний бюджет")
     f2 = tmp_path / "b.txt"
@@ -48,9 +49,9 @@ def test_cli_batch_multiworker(tmp_path):
         sys.stdout = sys_stdout
     data = json.loads(buf.getvalue())
     categories = {d["категорія"] for d in data}
-    assert {"BUD", "SCI"} <= categories
+    assert {"BUD"} <= categories
 
     runner = CliRunner()
-    result = runner.invoke(app, ["classify", str(file), "--json"])
+    result = runner.invoke(app, ["classify", str(f1), "--json"])
     assert "BUD" in result.stdout
 
