@@ -2,10 +2,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import List, Optional
 
-from .core import batch, classify_file
+from .core import classify_file
+from .io_utils import find_files
 from .rules import RuleEngine
 
 
@@ -24,7 +27,23 @@ def cmd_classify(args: argparse.Namespace) -> None:
 
 def cmd_batch(args: argparse.Namespace) -> None:
     engine = get_engine()
-    results = batch(Path(args.folder), ["*.txt", "*.docx", "*.pdf"], engine)
+    files = find_files(Path(args.folder), ["*.txt", "*.docx", "*.pdf"])
+    results = []
+
+    def _worker(path: Path):
+        try:
+            return classify_file(engine, path)
+        except Exception as exc:  # pragma: no cover - logging
+            logging.error("Помилка обробки %s: %s", path, exc)
+            return None
+
+    with ThreadPoolExecutor(max_workers=args.workers) as exc:
+        futs = [exc.submit(_worker, f) for f in files]
+        for fut in as_completed(futs):
+            res = fut.result()
+            if res is not None:
+                results.append(res)
+
     rows = [r.dict(by_alias=True) for r in results]
     if args.out:
         import csv
