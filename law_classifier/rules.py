@@ -6,6 +6,13 @@ from pathlib import Path
 from typing import Dict, List, Pattern
 
 try:
+
+    import yaml
+except ModuleNotFoundError as exc:  # pragma: no cover - dependency missing
+    raise ImportError(
+        "PyYAML is required to load rule definitions. Please install the 'pyyaml' package."
+    ) from exc
+=======
     import yaml  # type: ignore
 except ImportError:  # pragma: no cover - simplified fallback for tests
     import ast
@@ -28,6 +35,7 @@ except ImportError:  # pragma: no cover - simplified fallback for tests
             return data
 
     yaml = _SimpleYaml()
+
 
 logger = logging.getLogger(__name__)
 
