@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "law-classifier"
+version = "0.1.0"
+description = "Rule-based classifier for Ukrainian legal texts"
+readme = "docs/README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [{name = "OpenAI", email = "example@example.com"}]
+dependencies = [
+    "pyyaml",
+    "pdfminer-six",
+    "python-docx",
+    "spacy",
+]
+
+[project.scripts]
+law_classifier = "law_classifier.cli:main"
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+profile = "black"
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "W503"]
