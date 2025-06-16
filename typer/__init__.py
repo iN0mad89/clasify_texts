@@ -38,6 +38,7 @@ class Typer:
         remaining = list(args[1:])
         # parse options first
         i = 0
+        positional: List[str] = []
         while i < len(remaining):
             arg = remaining[i]
             if arg.startswith("--"):
@@ -53,9 +54,9 @@ class Typer:
                     extras[param.name if param else name] = remaining[i + 1]
                     i += 2
             else:
+                positional.append(arg)
                 i += 1
         # collect positional arguments
-        positional = [a for a in remaining if not a.startswith("--")]
         pos_iter = iter(positional)
         for p in params:
             if p.kind != p.POSITIONAL_OR_KEYWORD:

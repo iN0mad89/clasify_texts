@@ -7,7 +7,11 @@ def test_read_file_missing_docx(monkeypatch, tmp_path):
 
     doc = tmp_path / "file.docx"
     doc.write_text("text")
-    monkeypatch.setattr(io_utils, "Document", lambda path: (_ for _ in ()).throw(ImportError("no docx")))
+    monkeypatch.setattr(
+        "docx.Document",
+        lambda path: (_ for _ in ()).throw(ImportError("no docx")),
+        raising=False,
+    )
     with pytest.raises(io_utils.ParseError):
         io_utils.read_file(doc)
 
@@ -17,6 +21,10 @@ def test_read_file_missing_pdf(monkeypatch, tmp_path):
 
     pdf = tmp_path / "file.pdf"
     pdf.write_text("text")
-    monkeypatch.setattr(io_utils, "extract_text", lambda path: (_ for _ in ()).throw(ImportError("no pdf")))
+    monkeypatch.setattr(
+        "pdfminer.high_level.extract_text",
+        lambda path: (_ for _ in ()).throw(ImportError("no pdf")),
+        raising=False,
+    )
     with pytest.raises(io_utils.ParseError):
         io_utils.read_file(pdf)

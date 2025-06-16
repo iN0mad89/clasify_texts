@@ -7,7 +7,6 @@ from typing import List, Optional
 import typer
 
 from .core import batch as batch_core, classify_file
-
 from .rules import RuleEngine
 
 app = typer.Typer(help="Utilities for classifying Ukrainian legal texts")
@@ -15,7 +14,17 @@ app = typer.Typer(help="Utilities for classifying Ukrainian legal texts")
 
 def get_engine() -> RuleEngine:
     """Return a rule engine initialised with packaged terms."""
-    return RuleEngine(Path(__file__).resolve().parent.parent / "data" / "terms.yaml")
+    from importlib import resources
+
+    try:
+        pkg = "law_classifier.data"
+        data_path = resources.files(pkg) / "terms.yaml"
+    except ModuleNotFoundError:  # pragma: no cover - local source layout
+        pkg = "data"
+        data_path = resources.files(pkg) / "terms.yaml"
+
+    with resources.as_file(data_path) as path:
+        return RuleEngine(Path(path))
 
 
 @app.command()
@@ -38,6 +47,7 @@ def batch(
 ) -> None:
     """Classify all supported files in a folder."""
     engine = get_engine()
+
     workers = int(workers)
     if isinstance(out, str) and out.isdigit() and int(out) == workers:
         out = None
@@ -45,6 +55,9 @@ def batch(
         out = Path(out)
 
     results = batch_core(folder, ["*.txt", "*.docx", "*.pdf"], engine, workers=workers)
+
+=======
+    results = batch_core(folder, ["*.txt", "*.docx", "*.pdf"], engine)
 
     rows = [r.dict(by_alias=True) for r in results]
     if out:

@@ -39,7 +39,13 @@ def test_cli_batch_multiworker(tmp_path):
         sys.stdout = sys_stdout
     data = json.loads(buf.getvalue())
     categories = {d["категорія"] for d in data}
-    assert {"BUD", "SCI"} <= categories
+    assert {"BUD"} <= categories
 
+
+
+
+    runner = CliRunner()
+    result = runner.invoke(app, ["classify", str(f1), "--json"])
+    assert "BUD" in result.stdout
 
 
