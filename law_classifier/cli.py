@@ -1,19 +1,12 @@
 from __future__ import annotations
 
 import json
-import logging
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import List, Optional
-
-
-from .core import classify_file
-from .io_utils import find_files
 
 import typer
 
 from .core import batch as batch_core, classify_file
-
 from .rules import RuleEngine
 
 app = typer.Typer(help="Utilities for classifying Ukrainian legal texts")
@@ -21,7 +14,17 @@ app = typer.Typer(help="Utilities for classifying Ukrainian legal texts")
 
 def get_engine() -> RuleEngine:
     """Return a rule engine initialised with packaged terms."""
-    return RuleEngine(Path(__file__).resolve().parent.parent / "data" / "terms.yaml")
+    from importlib import resources
+
+    try:
+        pkg = "law_classifier.data"
+        data_path = resources.files(pkg) / "terms.yaml"
+    except ModuleNotFoundError:  # pragma: no cover - local source layout
+        pkg = "data"
+        data_path = resources.files(pkg) / "terms.yaml"
+
+    with resources.as_file(data_path) as path:
+        return RuleEngine(Path(path))
 
 
 @app.command()
@@ -44,27 +47,7 @@ def batch(
 ) -> None:
     """Classify all supported files in a folder."""
     engine = get_engine()
-
-    files = find_files(Path(args.folder), ["*.txt", "*.docx", "*.pdf"])
-    results = []
-
-    def _worker(path: Path):
-        try:
-            return classify_file(engine, path)
-        except Exception as exc:  # pragma: no cover - logging
-            logging.error("Помилка обробки %s: %s", path, exc)
-            return None
-
-    with ThreadPoolExecutor(max_workers=args.workers) as exc:
-        futs = [exc.submit(_worker, f) for f in files]
-        for fut in as_completed(futs):
-            res = fut.result()
-            if res is not None:
-                results.append(res)
-
-
     results = batch_core(folder, ["*.txt", "*.docx", "*.pdf"], engine)
-
     rows = [r.dict(by_alias=True) for r in results]
     if out:
         import csv
