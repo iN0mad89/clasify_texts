@@ -16,13 +16,13 @@ def classify_file(engine: RuleEngine, path: Path) -> DocumentResult:
     text = read_file(path)
     category, terms = engine.match(text)
     return DocumentResult(
-        id_документу=path.stem,
-        заголовок=None,
-        дата=None,
-        виявлені_терміни=terms,
-        категорія=category,
-        додаткові_ознаки=None,
-        шлях_файлу=path,
+        id_document=path.stem,
+        category=category,
+        title=None,
+        date=None,
+        terms=terms,
+        extra=None,
+        path=path,
     )
 
 
