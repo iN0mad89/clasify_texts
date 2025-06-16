@@ -5,7 +5,12 @@ import re
 from pathlib import Path
 from typing import Dict, List, Pattern
 
-import yaml
+try:
+    import yaml
+except ModuleNotFoundError as exc:  # pragma: no cover - dependency missing
+    raise ImportError(
+        "PyYAML is required to load rule definitions. Please install the 'pyyaml' package."
+    ) from exc
 
 logger = logging.getLogger(__name__)
 
