@@ -39,8 +39,26 @@ def batch(
 
 
 def save_csv(results: List[DocumentResult], path: Path) -> None:
+    """Save classification results to CSV.
+
+    If *results* is empty, an empty file with only the header will be created
+    and a warning logged.
+    """
+
+    fieldnames = [
+        f.metadata.get("alias", name)
+        for name, f in DocumentResult.__dataclass_fields__.items()
+    ]
+
+    if not results:
+        logger.warning("No results provided to save_csv")
+        with open(path, "w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+        return
+
     with open(path, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=results[0].dict(by_alias=True).keys())
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         for r in results:
             writer.writerow(r.dict(by_alias=True))

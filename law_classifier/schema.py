@@ -16,6 +16,12 @@ class DocumentResult:
     extra: Optional[str] = field(default=None, metadata={"alias": "додаткові_ознаки"})
     path: Path = field(default_factory=Path, metadata={"alias": "шлях_файлу"})
 
+    def __getattr__(self, item: str):  # pragma: no cover - simple alias access
+        for name, f in self.__dataclass_fields__.items():
+            if f.metadata.get("alias") == item:
+                return getattr(self, name)
+        raise AttributeError(item)
+
     def dict(self, *, by_alias: bool = False) -> dict:
         data = asdict(self)
         if isinstance(data.get("path"), Path):

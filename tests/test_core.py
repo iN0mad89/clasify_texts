@@ -23,3 +23,15 @@ def test_batch_and_save_csv(tmp_path):
         rows = list(csv.DictReader(f))
     assert len(rows) == 2
     assert {row["категорія"] for row in rows} == cats
+
+
+def test_save_csv_empty_results(tmp_path):
+    from law_classifier.core import save_csv
+
+    csv_path = tmp_path / "empty.csv"
+    # should not raise when results list is empty
+    save_csv([], csv_path)
+    with open(csv_path, newline="", encoding="utf-8") as f:
+        rows = list(csv.reader(f))
+    # only header row expected
+    assert len(rows) == 1
