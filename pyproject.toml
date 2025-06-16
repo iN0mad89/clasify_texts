@@ -10,12 +10,14 @@ readme = "docs/README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
 authors = [{name = "OpenAI", email = "example@example.com"}]
-dependencies = [
-    "pyyaml",
-    "pdfminer-six",
-    "python-docx",
-    "spacy",
-]
+dependencies = []
+
+[project.optional-dependencies]
+yaml = ["pyyaml"]
+docx = ["python-docx"]
+pdf = ["pdfminer-six"]
+spacy = ["spacy"]
+full = ["pyyaml", "python-docx", "pdfminer-six", "spacy"]
 
 [project.scripts]
 law_classifier = "law_classifier.cli:main"
