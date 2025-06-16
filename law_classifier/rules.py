@@ -6,11 +6,36 @@ from pathlib import Path
 from typing import Dict, List, Pattern
 
 try:
+
     import yaml
 except ModuleNotFoundError as exc:  # pragma: no cover - dependency missing
     raise ImportError(
         "PyYAML is required to load rule definitions. Please install the 'pyyaml' package."
     ) from exc
+=======
+    import yaml  # type: ignore
+except ImportError:  # pragma: no cover - simplified fallback for tests
+    import ast
+
+    class _SimpleYaml:
+        @staticmethod
+        def safe_load(text: str) -> Dict[str, List[str]]:
+            data: Dict[str, List[str]] = {}
+            key = None
+            for line in text.splitlines():
+                if not line.strip():
+                    continue
+                if not line.startswith("  - "):
+                    key = line.rstrip(":").strip()
+                    data[key] = []
+                else:
+                    assert key is not None
+                    value = line.strip()[2:].strip()
+                    data[key].append(ast.literal_eval(value))
+            return data
+
+    yaml = _SimpleYaml()
+
 
 logger = logging.getLogger(__name__)
 
