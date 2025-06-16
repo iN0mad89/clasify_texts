@@ -1,9 +1,8 @@
 from pathlib import Path
 
-from law_classifier.cli import main
-
-
 def test_cli_classify(tmp_path):
+    from law_classifier.cli import main
+
     file = tmp_path / "test.txt"
     file.write_text("Постанова про державний бюджет")
     # capture output
