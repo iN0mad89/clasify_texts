@@ -47,7 +47,18 @@ def batch(
 ) -> None:
     """Classify all supported files in a folder."""
     engine = get_engine()
+
+    workers = int(workers)
+    if isinstance(out, str) and out.isdigit() and int(out) == workers:
+        out = None
+    elif isinstance(out, str):
+        out = Path(out)
+
+    results = batch_core(folder, ["*.txt", "*.docx", "*.pdf"], engine, workers=workers)
+
+=======
     results = batch_core(folder, ["*.txt", "*.docx", "*.pdf"], engine)
+
     rows = [r.dict(by_alias=True) for r in results]
     if out:
         import csv

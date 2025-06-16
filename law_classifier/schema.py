@@ -29,3 +29,9 @@ class DocumentResult:
 
     def json(self, *, by_alias: bool = False, ensure_ascii: bool = False) -> str:
         return json.dumps(self.dict(by_alias=by_alias), ensure_ascii=ensure_ascii)
+
+    def __getattr__(self, name: str):  # pragma: no cover - simple alias access
+        for field_name, f in self.__dataclass_fields__.items():
+            if f.metadata.get("alias") == name:
+                return getattr(self, field_name)
+        raise AttributeError(name)

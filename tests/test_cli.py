@@ -1,13 +1,3 @@
-from pathlib import Path
-
-
-
-from typer.testing import CliRunner
-
-from law_classifier.cli import app
-
-
-
 def test_cli_classify(tmp_path):
     from law_classifier.cli import main
 
@@ -51,7 +41,11 @@ def test_cli_batch_multiworker(tmp_path):
     categories = {d["категорія"] for d in data}
     assert {"BUD"} <= categories
 
+
+
+
     runner = CliRunner()
     result = runner.invoke(app, ["classify", str(f1), "--json"])
     assert "BUD" in result.stdout
+
 

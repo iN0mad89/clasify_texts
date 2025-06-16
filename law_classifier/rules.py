@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 import logging
@@ -34,8 +35,8 @@ logger = logging.getLogger(__name__)
 
 CATEGORY_ORDER = [
     ("OBS", "Нечинний"),
-    ("BUD", "Бюджет"),
     ("SCI", "Науковець"),
+    ("BUD", "Бюджет"),
     ("INS", "Інститут"),
     ("REG", "Регулювання"),
     ("STA", "Статус"),
