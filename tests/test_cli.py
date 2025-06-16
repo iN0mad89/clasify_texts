@@ -1,13 +1,3 @@
-from pathlib import Path
-
-
-
-from typer.testing import CliRunner
-
-from law_classifier.cli import app
-
-
-
 def test_cli_classify(tmp_path):
     from law_classifier.cli import main
 
@@ -30,6 +20,7 @@ def test_cli_classify(tmp_path):
 
 
 def test_cli_batch_multiworker(tmp_path):
+    from law_classifier.cli import main
     f1 = tmp_path / "a.txt"
     f1.write_text("Постанова про державний бюджет")
     f2 = tmp_path / "b.txt"
@@ -50,7 +41,5 @@ def test_cli_batch_multiworker(tmp_path):
     categories = {d["категорія"] for d in data}
     assert {"BUD", "SCI"} <= categories
 
-    runner = CliRunner()
-    result = runner.invoke(app, ["classify", str(file), "--json"])
-    assert "BUD" in result.stdout
+
 

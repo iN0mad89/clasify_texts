@@ -27,14 +27,30 @@ def classify_file(engine: RuleEngine, path: Path) -> DocumentResult:
 
 
 def batch(
-    folder: Path, patterns: Iterable[str], engine: RuleEngine
+    folder: Path, patterns: Iterable[str], engine: RuleEngine, workers: int = 1
 ) -> List[DocumentResult]:
+    files = find_files(folder, list(patterns))
     results: List[DocumentResult] = []
-    for file in find_files(folder, list(patterns)):
-        try:
-            results.append(classify_file(engine, file))
-        except Exception as exc:  # pragma: no cover - log and continue
-            logger.error("Помилка обробки %s: %s", file, exc)
+    if workers > 1:
+        from concurrent.futures import ThreadPoolExecutor
+
+        def _worker(path: Path) -> DocumentResult | None:
+            try:
+                return classify_file(engine, path)
+            except Exception as exc:  # pragma: no cover - log and continue
+                logger.error("Помилка обробки %s: %s", path, exc)
+                return None
+
+        with ThreadPoolExecutor(max_workers=workers) as exc:
+            for fut in exc.map(_worker, files):
+                if fut is not None:
+                    results.append(fut)
+    else:
+        for file in files:
+            try:
+                results.append(classify_file(engine, file))
+            except Exception as exc:  # pragma: no cover - log and continue
+                logger.error("Помилка обробки %s: %s", file, exc)
     return results
 
 
